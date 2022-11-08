@@ -18,6 +18,8 @@ _output/
 .gradle
 build
 gradle
+gradlew.bat
+gradlew
 
 # git
 *.orig
