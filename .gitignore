@@ -1,0 +1,23 @@
+build/bundles
+*.log*
+.vscode
+.test
+.out
+!./.gitignore
+coverage.txt
+.DS_Store
+logs/
+/cover.out
+_output/
+
+# Idea
+.idea
+*.iml
+
+# gradle
+.gradle
+build
+gradle
+
+# git
+*.orig
