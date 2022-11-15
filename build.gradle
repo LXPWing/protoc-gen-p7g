@@ -19,6 +19,9 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
     // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
     implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.21.7'
+    // https://mvnrepository.com/artifact/org.freemarker/freemarker
+    implementation 'org.freemarker:freemarker:2.3.31'
+
 }
 
 test {
