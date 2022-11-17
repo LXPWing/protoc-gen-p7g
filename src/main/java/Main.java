@@ -1,6 +1,7 @@
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
+import render.ParsingDocuments;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -13,37 +14,15 @@ public class Main {
         // Plugin receives a serialized CodeGeneratorRequest via stdin
         PluginProtos.CodeGeneratorRequest request = PluginProtos.CodeGeneratorRequest.parseFrom(System.in);
 
-        // CodeGeneratorRequest contain FileDescriptorProtos for all the proto files we need to process
-        // as well as their dependencies.  We want to convert the FileDescriptorProtos into FileDescriptor instances,
-        // since they are easier to work with. We will build a map that maps file names to the corresponding file
-        // descriptor.
-        Map<String, Descriptors.FileDescriptor> filesByName = new HashMap<>();
+        ParsingDocuments.getFields(ParsingDocuments.doAnalysisProtoFile(request));
 
-        for (DescriptorProtos.FileDescriptorProto fp: request.getProtoFileList()) {
-            // The dependencies of fp are provided as strings, we look them up in the map as we are generating it.
-            Descriptors.FileDescriptor dependencies[] =
-                    fp.getDependencyList().stream().map(filesByName::get).toArray(Descriptors.FileDescriptor[]::new);
-
-            Descriptors.FileDescriptor fd  = Descriptors.FileDescriptor.buildFrom(fp, dependencies);
-
-            filesByName.put(
-                    fp.getName(),
-                    fd
-            );
-        }
 
         // Building the response
-        PluginProtos.CodeGeneratorResponse.Builder response = PluginProtos.CodeGeneratorResponse.newBuilder();
+        //PluginProtos.CodeGeneratorResponse.Builder response = PluginProtos.CodeGeneratorResponse.newBuilder();
 
-        for (String fileName : request.getFileToGenerateList()) {
-            Descriptors.FileDescriptor fd = filesByName.get(fileName);
-            response.addFileBuilder()
-                    .setName(fd.getFullName().replaceAll("\\.proto$", ".txt"))
-                    .setContent(generateFileContent(fd));
-        }
 
         // Serialize the response to stdout
-        response.build().writeTo(System.out);
+        //response.build().writeTo(System.out);
     }
 
     private static String generateFileContent(Descriptors.FileDescriptor fd) {

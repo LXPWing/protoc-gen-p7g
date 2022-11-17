@@ -5,17 +5,17 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ParsingDocuments {
     // CodeGeneratorRequest contain FileDescriptorProtos for all the proto files we need to process
     // as well as their dependencies.  We want to convert the FileDescriptorProtos into FileDescriptor instances,
     // since they are easier to work with. We will build a map that maps file names to the corresponding file
     // descriptor.
-    Map<String, Descriptors.FileDescriptor> filesByName = new HashMap<>();
+    public static final Map<String, Descriptors.FileDescriptor> filesByName = new HashMap<>();
 
-    public void doAnalysis(PluginProtos.CodeGeneratorRequest request) throws Descriptors.DescriptorValidationException {
+    public static Map<String, Descriptors.FileDescriptor> doAnalysisProtoFile(PluginProtos.CodeGeneratorRequest request) throws Descriptors.DescriptorValidationException {
         for (DescriptorProtos.FileDescriptorProto fp: request.getProtoFileList()) {
             // The dependencies of fp are provided as strings, we look them up in the map as we are generating it.
             Descriptors.FileDescriptor dependencies[] =
@@ -27,6 +27,28 @@ public class ParsingDocuments {
                     fp.getName(),
                     fd
             );
+        }
+
+        return filesByName;
+    }
+
+
+    public static void getFields(Map<String, Descriptors.FileDescriptor> map) {
+        for(Map.Entry<String, Descriptors.FileDescriptor> entry:map.entrySet()){
+            String fileName = entry.getKey();
+            Descriptors.FileDescriptor fileDescriptor = entry.getValue();
+            List<Descriptors.Descriptor> messageType  = fileDescriptor.getMessageTypes();
+            System.out.println("====");
+            for (Descriptors.Descriptor d : messageType) {
+                System.out.println(d.getFields());
+                List<Descriptors.FieldDescriptor> list = d.getFields();
+                for (Descriptors.FieldDescriptor l : list){
+                    System.out.println(l.getJavaType());
+                }
+                System.out.println(d.getFullName());
+                System.out.println(d.getName());
+            }
+            System.out.println("====");
         }
     }
 
@@ -43,24 +65,5 @@ public class ParsingDocuments {
         sb.append("|- ");
         sb.append(messageType.getName());
         sb.append("(");
-
-//        sb.append(
-//                String.join(
-//                        ", ",
-//                        messageType
-//                                .getFields()
-//                                .stream()
-//                                .map(field -> field.getName() + ": " + renderType(field))
-//                                .collect(Collectors.joining(", "))
-//                )
-//        );
-//        sb.append(")");
-//        sb.append(System.getProperty("line.separator"));
-//
-//        // recurse for nested messages.
-//        sb.append(String.join("", Collections.nCopies(indent, " ")));
-//        for (Descriptors.Descriptor nestedType : messageType.getNestedTypes()) {
-//            generateMessage(sb, nestedType, indent + 3);
-//        }
     }
 }
