@@ -44,6 +44,7 @@ public class ParsingDocuments {
                 List<Descriptors.FieldDescriptor> list = d.getFields();
                 for (Descriptors.FieldDescriptor l : list){
                     System.out.println(l.getJavaType());
+                    //if (l.getMessageType() != null) System.out.println(l.getMessageType());
                 }
                 System.out.println(d.getFullName());
                 System.out.println(d.getName());
@@ -65,5 +66,17 @@ public class ParsingDocuments {
         sb.append("|- ");
         sb.append(messageType.getName());
         sb.append("(");
+    }
+
+    private Map<String, String> getJavaType(List<Descriptors.FieldDescriptor> fieldDescriptorList){
+        Map<String, String> map = new HashMap<>();
+        for(Descriptors.FieldDescriptor fields:fieldDescriptorList){
+            String name = fields.getName();
+            String type = String.valueOf(fields.getJavaType());
+
+        }
+
+
+        return null;
     }
 }
