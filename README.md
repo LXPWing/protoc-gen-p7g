@@ -2,7 +2,7 @@
 
 Q：为什么要用gradle
 
-A：使用gradle installDist编译可以更容易支持mac与winfows用户。
+A：使用gradle installDist编译可以更容易支持mac与windows用户。
 
 ## 如何运行
 
