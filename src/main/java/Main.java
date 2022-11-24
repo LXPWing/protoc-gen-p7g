@@ -1,12 +1,9 @@
-import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
-import render.ParsingDocuments;
+import render.ParsingProtoc3;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -14,7 +11,7 @@ public class Main {
         // Plugin receives a serialized CodeGeneratorRequest via stdin
         PluginProtos.CodeGeneratorRequest request = PluginProtos.CodeGeneratorRequest.parseFrom(System.in);
 
-        ParsingDocuments.getFields(ParsingDocuments.doAnalysisProtoFile(request));
+        ParsingProtoc3.getFields(ParsingProtoc3.doAnalysisProtoFile(request));
 
 
         // Building the response

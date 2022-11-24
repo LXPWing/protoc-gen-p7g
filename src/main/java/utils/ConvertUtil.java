@@ -2,7 +2,7 @@ package utils;
 
 import com.google.protobuf.Descriptors;
 
-public class Conversion {
+public class ConvertUtil {
 
     public static final String convertToString(Descriptors.FieldDescriptor.JavaType javaType) {
         if(javaType.equals(Descriptors.FieldDescriptor.JavaType.STRING)){

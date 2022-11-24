@@ -1,5 +1,11 @@
 package render;
 
-public interface IProtocl {
+import java.util.Map;
+
+public interface IProtocl<T> {
+    void getFields(Map<String, T> map);
+
+    void doAnalysisProtoFile(Object request);
+
 
 }

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ParsingDocuments {
+public class ParsingProtoc3 {
     // CodeGeneratorRequest contain FileDescriptorProtos for all the proto files we need to process
     // as well as their dependencies.  We want to convert the FileDescriptorProtos into FileDescriptor instances,
     // since they are easier to work with. We will build a map that maps file names to the corresponding file
@@ -53,20 +53,20 @@ public class ParsingDocuments {
         }
     }
 
-    public static String generateFileContent(Descriptors.FileDescriptor fd) {
-        StringBuilder sb = new StringBuilder();
-        for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
-            generateMessage(sb, messageType, 0);
-        }
-        return sb.toString();
-    }
-
-    private static void generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent) {
-        sb.append(String.join("", Collections.nCopies(indent, " ")));
-        sb.append("|- ");
-        sb.append(messageType.getName());
-        sb.append("(");
-    }
+//    public static String generateFileContent(Descriptors.FileDescriptor fd) {
+//        StringBuilder sb = new StringBuilder();
+//        for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
+//            generateMessage(sb, messageType, 0);
+//        }
+//        return sb.toString();
+//    }
+//
+//    private static void generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent) {
+//        sb.append(String.join("", Collections.nCopies(indent, " ")));
+//        sb.append("|- ");
+//        sb.append(messageType.getName());
+//        sb.append("(");
+//    }
 
     private Map<String, String> getJavaType(List<Descriptors.FieldDescriptor> fieldDescriptorList){
         Map<String, String> map = new HashMap<>();
