@@ -1,9 +1,10 @@
 package dto;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class JavaMessage implements Message {
+public class JavaMessage extends Message implements Serializable {
     private Map<String, String> javaType;
 
     private String packageInfo;

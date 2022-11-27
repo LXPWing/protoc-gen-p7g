@@ -42,8 +42,17 @@ public class ParsingProtoc3 {
             for (Descriptors.Descriptor d : messageType) {
                 System.out.println(d.getFields());
                 List<Descriptors.FieldDescriptor> list = d.getFields();
+                List<Descriptors.EnumDescriptor> enumTypes = d.getEnumTypes();
+
+                for (Descriptors.EnumDescriptor e:enumTypes){
+                    System.out.println(e.getName());
+                    System.out.println(e.getValues());
+                }
+
                 for (Descriptors.FieldDescriptor l : list){
+                    //System.out.println(list.size());
                     System.out.println(l.getJavaType());
+                    System.out.println(l.isMapField());
                     //if (l.getMessageType() != null) System.out.println(l.getMessageType());
                 }
                 System.out.println(d.getFullName());

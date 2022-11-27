@@ -1,3 +1,5 @@
+package dto;
+
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
 

@@ -7,5 +7,7 @@ public interface IProtocl<T> {
 
     void doAnalysisProtoFile(Object request);
 
+    void getMapField(Map<String, T> map);
 
+    void getEnumField(Map<String, T> map);
 }

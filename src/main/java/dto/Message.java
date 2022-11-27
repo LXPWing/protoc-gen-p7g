@@ -1,4 +1,5 @@
 package dto;
 
-public interface Message {
+public abstract class Message {
+
 }
