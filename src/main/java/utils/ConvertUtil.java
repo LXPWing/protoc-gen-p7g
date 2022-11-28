@@ -19,9 +19,14 @@ public class ConvertUtil {
             return "Long";
         } else if(javaType.equals(Descriptors.FieldDescriptor.JavaType.FLOAT)) {
             return "Float";
+        } else if(javaType.equals(Descriptors.FieldDescriptor.JavaType.ENUM)) {
+            return "Enum";
+        } else {
+            return "Message";
         }
-
-        return null;
     }
 
+    public static final String convertToString(Descriptors.FieldDescriptor.Type type){
+        return convertToString(type.getJavaType());
+    }
 }
