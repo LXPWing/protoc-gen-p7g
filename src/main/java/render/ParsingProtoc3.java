@@ -69,31 +69,15 @@ public class ParsingProtoc3 implements IProtocl<Descriptors.Descriptor>{
         }
     }
 
-//    public static String generateFileContent(Descriptors.FileDescriptor fd) {
-//        StringBuilder sb = new StringBuilder();
-//        for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
-//            generateMessage(sb, messageType, 0);
-//        }
-//        return sb.toString();
-//    }
-//
-//    private static void generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent) {
-//        sb.append(String.join("", Collections.nCopies(indent, " ")));
-//        sb.append("|- ");
-//        sb.append(messageType.getName());
-//        sb.append("(");
-//    }
-
     private Map<String, String> getJavaType(List<Descriptors.FieldDescriptor> fieldDescriptorList){
         Map<String, String> map = new HashMap<>();
         for(Descriptors.FieldDescriptor fields:fieldDescriptorList){
             String name = fields.getName();
             String type = String.valueOf(fields.getJavaType());
-
+            map.put(name, type);
         }
 
-
-        return null;
+        return map;
     }
 
     public ParsingProtoc3(Message message) {
@@ -107,15 +91,10 @@ public class ParsingProtoc3 implements IProtocl<Descriptors.Descriptor>{
         for(Descriptors.FieldDescriptor f:fields){
             String name = f.getName();
             String type = ConvertUtil.convertToString(f.getJavaType());
-            if(type.equals(null)) {
-                // f.getType()
-            } else {
-                map.put(name, type);
-            }
+            map.put(name, type);
         }
-
+        // return map;
     }
-
 
     @Override
     public void doAnalysisProtoFile(Object request) {
