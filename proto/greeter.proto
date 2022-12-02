@@ -10,6 +10,20 @@ option java_package="proto1/greeter";
 
 message HelloRequest {
     string name = 1;
+
+    message Hello {
+        string name = 1;
+    }
+
+    HelloReply rer = 3;
+
+    enum Test {
+        A = 0;
+        B = 1;
+        C = 3;
+    }
+
+    map<string, HelloReply> m = 2;
 }
 message HelloReply {
     string message = 1;

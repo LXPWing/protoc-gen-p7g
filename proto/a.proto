@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+message Foo {
+  int32 foo_f1 = 1;
+  string foo_f2 = 2;
+
+  message Bar {
+    repeated int64 bar = 1;
+  }
+
+  map<string, XYZ> map_str_to_int32 = 7;
+}
+
+message XYZ {
+}
