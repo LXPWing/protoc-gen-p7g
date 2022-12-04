@@ -15,5 +15,5 @@ public interface IProtocl<T> {
 
     void getEnumField(T t);
 
-    void renderType(Descriptors.FieldDescriptor fd);
+    // void renderType(Descriptors.FieldDescriptor fd);
 }

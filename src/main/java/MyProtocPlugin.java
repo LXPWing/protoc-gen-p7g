@@ -48,15 +48,19 @@ public class MyProtocPlugin {
     }
 
     private static String generateFileContent(Descriptors.FileDescriptor fd) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder s = new StringBuilder();
+        // 获取字段
         for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
-            generateMessage(sb, messageType, 0);
+            //System.out.println(fd.getMessageTypes().size());
+            //System.out.println(messageType.getName());
+            StringBuilder sb = new StringBuilder();
+            generateMessage(s, messageType, 0);
         }
-        return sb.toString();
+        return s.toString();
     }
 
     private static String renderType(Descriptors.FieldDescriptor fd) {
-        if (fd.isRepeated()) {
+        if (fd.isRepeated() && !fd.isMapField()) {
             return "List<" + renderSingleType(fd) + ">";
         } else {
             return renderSingleType(fd);
@@ -67,14 +71,11 @@ public class MyProtocPlugin {
         if (fd.getType() != Descriptors.FieldDescriptor.Type.MESSAGE) {
             return fd.getType().toString();
         } else {
-//            System.out.println("===");
-//            System.out.println(fd.getMessageType().getName());
-//            System.out.println("===");
             return fd.getMessageType().getName();
         }
     }
 
-    private static void generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent) {
+    private static StringBuilder generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent) {
         sb.append(String.join("", Collections.nCopies(indent, " ")));
         sb.append("|- ");
         sb.append(messageType.getName());
@@ -94,9 +95,11 @@ public class MyProtocPlugin {
         sb.append(System.getProperty("line.separator"));
 
         // recurse for nested messages.
-        sb.append(String.join("", Collections.nCopies(indent, " ")));
+        //sb.append(String.join("", Collections.nCopies(indent, " ")));
+        sb.append("\n");
         for (Descriptors.Descriptor nestedType : messageType.getNestedTypes()) {
             generateMessage(sb, nestedType, indent + 3);
         }
+        return sb;
     }
 }

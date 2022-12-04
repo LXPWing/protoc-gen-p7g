@@ -13,6 +13,7 @@ message HelloRequest {
 
     message Hello {
         string name = 1;
+        map<string, HelloReply> map = 2;
     }
 
     HelloReply rer = 3;

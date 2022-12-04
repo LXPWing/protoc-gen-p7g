@@ -11,13 +11,13 @@ public class Main {
         // Plugin receives a serialized CodeGeneratorRequest via stdin
         PluginProtos.CodeGeneratorRequest request = PluginProtos.CodeGeneratorRequest.parseFrom(System.in);
 
-        ParsingProtoc3.getFields(ParsingProtoc3.doAnalysisProtoFile(request));
-
+        StringBuilder fields = ParsingProtoc3.getFields(ParsingProtoc3.doAnalysisProtoFile(request));
 
         // Building the response
-        //PluginProtos.CodeGeneratorResponse.Builder response = PluginProtos.CodeGeneratorResponse.newBuilder();
-
-
+        PluginProtos.CodeGeneratorResponse.Builder response = PluginProtos.CodeGeneratorResponse.newBuilder();
+        response.addFileBuilder()
+                .setName("greeter".replaceAll("\\.proto$", ".txt"))
+                .setContent(fields.toString());
         // Serialize the response to stdout
         //response.build().writeTo(System.out);
     }

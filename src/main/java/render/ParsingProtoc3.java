@@ -2,11 +2,11 @@ package render;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
-import com.google.protobuf.MapField;
 import com.google.protobuf.compiler.PluginProtos;
 import dto.Message;
 import utils.ConvertUtil;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,70 +37,53 @@ public class ParsingProtoc3 implements IProtocl<Descriptors.Descriptor>{
     }
 
 
-    public static void getFields(Map<String, Descriptors.FileDescriptor> map) {
+    public static StringBuilder getFields(Map<String, Descriptors.FileDescriptor> map) {
+        StringBuilder stringBuilder = new StringBuilder();
         for(Map.Entry<String, Descriptors.FileDescriptor> entry:map.entrySet()){
-            String fileName = entry.getKey();
-            Descriptors.FileDescriptor fileDescriptor = entry.getValue();
-            List<Descriptors.Descriptor> messageType  = fileDescriptor.getMessageTypes();
-//            System.out.println("====");
-            for (Descriptors.Descriptor d : messageType) {
-//                System.out.println(d.getFields());
-                List<Descriptors.FieldDescriptor> list = d.getFields();
-                List<Descriptors.EnumDescriptor> enumTypes = d.getEnumTypes();
-                List<Descriptors.Descriptor> nestedTypes = d.getNestedTypes();
-                nestedTypes.forEach( i -> {
-                    i.getNestedTypes().forEach(y -> {
-                        System.out.println(y.getName());
-                    });
-                });
-
-//                for (Descriptors.EnumDescriptor e:enumTypes){
-//                    System.out.println(e.getName());
-//                    System.out.println(e.getValues());
-//                }
-
-                for (Descriptors.FieldDescriptor l : list){
-                    //System.out.println(list.size());
-                    //System.out.println(l.getJavaType());
-                    if(l.isMapField()) {
-
-//                        Descriptors.Descriptor messageType1 = l.getMessageType();
-//                        List<Descriptors.Descriptor> nestedTypes = messageType1.getNestedTypes();
-//                        nestedTypes.forEach(n -> {
-//                            List<Descriptors.FieldDescriptor> fields = n.getFields();
-//                            fields.forEach(f -> {
-//                                System.out.println(f.getMessageType().getName());
-//                            });
-//                        });
-//
-//                        System.out.println(l.getJsonName());
-//                        //System.out.println("=====");
-//                        List<Descriptors.FieldDescriptor> fields = messageType1.getFields();
-//                        //System.out.println(messageType1.getFields());
-//                        fields.forEach(item -> {
-//                           // Descriptors.Descriptor messageType2 = item.getMessageType();
-//                            System.out.println(item.getJsonName());
-//                            Descriptors.Descriptor containingType = item.getContainingType();
-//                            List<Descriptors.FieldDescriptor> fields1 = containingType.getFields();
-//                            fields1.forEach(i -> {
-//                                System.out.println(i.getName());
-//                            });
-//                            //System.out.println(item.getContainingType());
-                            //item.get
-                            //MapField.newMapField(item)
-                            //System.out.println(item.getFullName());
-                            //System.out.println();
-                    //});
-                        //System.out.println("=====");
-                        //System.out.println(l.getMessageType().getName());
-                    }
-                    //System.out.println(l.isMapField());
-                    //if (l.getMessageType() != null) System.out.println(l.getMessageType());
-                }
-                //System.out.println(d.getFullName());
-                //System.out.println(d.getName());
+            Descriptors.FileDescriptor value = entry.getValue();
+            for (Descriptors.Descriptor messageType : value.getMessageTypes()) {
+                generateMessage(stringBuilder, messageType, 0);
             }
-            //System.out.println("====");
+        }
+        return stringBuilder;
+    }
+
+    private static void generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent) {
+        sb.append(String.join("", Collections.nCopies(indent, " ")));
+        sb.append("|- ");
+        sb.append(messageType.getName());
+        sb.append("(");
+
+        sb.append(
+                String.join(
+                        ", ",
+                        messageType
+                                .getFields()
+                                .stream()
+                                .map(field -> field.getName() + ": " + renderType(field))
+                                .collect(Collectors.joining(", "))
+                )
+        );
+        sb.append(")");
+        sb.append(System.getProperty("line.separator"));
+        for (Descriptors.Descriptor nestedType : messageType.getNestedTypes()) {
+            generateMessage(sb, nestedType, indent + 3);
+        }
+    }
+
+    private static String renderType(Descriptors.FieldDescriptor fd) {
+        if (fd.isRepeated()) {
+            return "List<" + renderSingleType(fd) + ">";
+        } else {
+            return renderSingleType(fd);
+        }
+    }
+
+    private static String renderSingleType(Descriptors.FieldDescriptor fd) {
+        if (fd.getType() != Descriptors.FieldDescriptor.Type.MESSAGE) {
+            return fd.getType().toString();
+        } else {
+            return fd.getMessageType().getName();
         }
     }
 
@@ -140,7 +123,7 @@ public class ParsingProtoc3 implements IProtocl<Descriptors.Descriptor>{
     public void getMapField(Descriptors.Descriptor descriptor) {
         List<Descriptors.FieldDescriptor> fields = descriptor.getFields();
         List<Descriptors.FieldDescriptor> message = fields.stream()
-                .filter(item -> !item.isMapField() )
+                .filter(item -> !item.isMapField())
                 .collect(Collectors.toList());
         message.forEach(item -> {
             String name = item.getName();
@@ -158,8 +141,8 @@ public class ParsingProtoc3 implements IProtocl<Descriptors.Descriptor>{
         });
     }
 
-    @Override
-    public void renderType(Descriptors.FieldDescriptor fd) {
-
-    }
+//    @Override
+//    public void renderType(Descriptors.FieldDescriptor fd) {
+//
+//    }
 }
