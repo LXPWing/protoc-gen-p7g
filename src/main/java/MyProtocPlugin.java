@@ -1,6 +1,7 @@
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
+import dto.JavaMessage;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -9,7 +10,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MyProtocPlugin {
-
+    private Map<String, JavaMessage> map = new HashMap<>();
+    private static JavaMessage javaMessage = new JavaMessage();
     public static void main(String[] args) throws IOException, Descriptors.DescriptorValidationException {
         // Plugin receives a serialized CodeGeneratorRequest via stdin
         PluginProtos.CodeGeneratorRequest request = PluginProtos.CodeGeneratorRequest.parseFrom(System.in);
@@ -38,6 +40,11 @@ public class MyProtocPlugin {
 
         for (String fileName : request.getFileToGenerateList()) {
             Descriptors.FileDescriptor fd = filesByName.get(fileName);
+
+            javaMessage.setClassName(fileName);
+            javaMessage.setMessageTypeInfo(new HashMap<>());
+            //javaMessage.set
+
             response.addFileBuilder()
                     .setName(fd.getFullName().replaceAll("\\.proto$", ".txt"))
                     .setContent(generateFileContent(fd));
@@ -62,6 +69,12 @@ public class MyProtocPlugin {
     private static String renderType(Descriptors.FieldDescriptor fd) {
         if (fd.isRepeated() && !fd.isMapField()) {
             return "List<" + renderSingleType(fd) + ">";
+        }
+
+        if(fd.getType() == Descriptors.FieldDescriptor.Type.ENUM && fd.getEnumType() != null) {
+            Descriptors.EnumDescriptor enumType = fd.getEnumType();
+            System.out.println(enumType.getValues().toString());
+            return enumType.getValues().toString();
         } else {
             return renderSingleType(fd);
         }
@@ -71,6 +84,7 @@ public class MyProtocPlugin {
         if (fd.getType() != Descriptors.FieldDescriptor.Type.MESSAGE) {
             return fd.getType().toString();
         } else {
+            //if(fd.isMapField())return "";
             return fd.getMessageType().getName();
         }
     }
@@ -80,6 +94,11 @@ public class MyProtocPlugin {
         sb.append("|- ");
         sb.append(messageType.getName());
         sb.append("(");
+
+        for (Descriptors.FieldDescriptor field : messageType.getFields()) {
+
+        }
+
 
         sb.append(
             String.join(

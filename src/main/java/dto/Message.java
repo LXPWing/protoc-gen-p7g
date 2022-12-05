@@ -12,11 +12,13 @@ public abstract class Message {
 
     private Map<String, String> messageTypeInfo;
 
-    private Map<String, List<Object>> embedEnumInfo;
+    private Map<String, List<Object>> enumInfo;
 
-    private Map<String, Map<Object, Object>> mapInfo;
+    private Map<String, List<String>> mapInfo;
 
     private Map<String, Message> embedMessageInfo;
+
+    private Map<String, String> listInfo;
 
     public String getPackagePath() {
         return packagePath;
@@ -50,20 +52,12 @@ public abstract class Message {
         this.messageTypeInfo = messageTypeInfo;
     }
 
-    public Map<String, List<Object>> getEmbedEnumInfo() {
-        return embedEnumInfo;
+    public Map<String, List<Object>> getEnumInfo() {
+        return enumInfo;
     }
 
-    public void setEmbedEnumInfo(Map<String, List<Object>> embedEnumInfo) {
-        this.embedEnumInfo = embedEnumInfo;
-    }
-
-    public Map<String, Map<Object, Object>> getMapInfo() {
-        return mapInfo;
-    }
-
-    public void setMapInfo(Map<String, Map<Object, Object>> mapInfo) {
-        this.mapInfo = mapInfo;
+    public void setEnumInfo(Map<String, List<Object>> enumInfo) {
+        this.enumInfo = enumInfo;
     }
 
     public Map<String, Message> getEmbedMessageInfo() {
@@ -72,5 +66,21 @@ public abstract class Message {
 
     public void setEmbedMessageInfo(Map<String, Message> embedMessageInfo) {
         this.embedMessageInfo = embedMessageInfo;
+    }
+
+    public Map<String, List<String>> getMapInfo() {
+        return mapInfo;
+    }
+
+    public void setMapInfo(Map<String, List<String>> mapInfo) {
+        this.mapInfo = mapInfo;
+    }
+
+    public Map<String, String> getListInfo() {
+        return listInfo;
+    }
+
+    public void setListInfo(Map<String, String> listInfo) {
+        this.listInfo = listInfo;
     }
 }

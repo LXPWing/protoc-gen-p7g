@@ -41,8 +41,18 @@ public class ParsingProtoc3 implements IProtocl<Descriptors.Descriptor>{
         StringBuilder stringBuilder = new StringBuilder();
         for(Map.Entry<String, Descriptors.FileDescriptor> entry:map.entrySet()){
             Descriptors.FileDescriptor value = entry.getValue();
+            for (Descriptors.EnumDescriptor enumType : value.getEnumTypes()) {
+                System.out.println(enumType.getName());
+                System.out.println(enumType.getValues());
+            }
+
             for (Descriptors.Descriptor messageType : value.getMessageTypes()) {
-                generateMessage(stringBuilder, messageType, 0);
+                //generateMessage(stringBuilder, messageType, 0);
+                for (Descriptors.FieldDescriptor field : messageType.getFields()) {
+                    System.out.println(field.getName());
+//                    System.out.println(messageType.getFields().size());
+                }
+
             }
         }
         return stringBuilder;
@@ -140,9 +150,4 @@ public class ParsingProtoc3 implements IProtocl<Descriptors.Descriptor>{
             map.put(name, values);
         });
     }
-
-//    @Override
-//    public void renderType(Descriptors.FieldDescriptor fd) {
-//
-//    }
 }

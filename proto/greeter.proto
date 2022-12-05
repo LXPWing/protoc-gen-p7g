@@ -29,3 +29,9 @@ message HelloRequest {
 message HelloReply {
     string message = 1;
 }
+
+enum Test1 {
+    A = 0;
+    B = 1;
+    C = 3;
+}
