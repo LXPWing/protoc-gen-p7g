@@ -2,10 +2,12 @@ import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
 import dto.JavaMessage;
+import utils.ConvertUtil;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -51,17 +53,15 @@ public class MyProtocPlugin {
         }
 
         // Serialize the response to stdout
-        response.build().writeTo(System.out);
+        //response.build().writeTo(System.out);
     }
 
     private static String generateFileContent(Descriptors.FileDescriptor fd) {
         StringBuilder s = new StringBuilder();
         // 获取字段
         for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
-            //System.out.println(fd.getMessageTypes().size());
-            //System.out.println(messageType.getName());
-            StringBuilder sb = new StringBuilder();
-            generateMessage(s, messageType, 0);
+            JavaMessage javaMessage = new JavaMessage();
+            generateMessage(s, messageType, 0, javaMessage);
         }
         return s.toString();
     }
@@ -71,9 +71,11 @@ public class MyProtocPlugin {
             return "List<" + renderSingleType(fd) + ">";
         }
 
-        if(fd.getType() == Descriptors.FieldDescriptor.Type.ENUM && fd.getEnumType() != null) {
+        //System.out.println(fd.getType());
+
+        if(fd.getType() == Descriptors.FieldDescriptor.Type.ENUM) {
             Descriptors.EnumDescriptor enumType = fd.getEnumType();
-            System.out.println(enumType.getValues().toString());
+            System.out.println(enumType.getValues());
             return enumType.getValues().toString();
         } else {
             return renderSingleType(fd);
@@ -89,16 +91,24 @@ public class MyProtocPlugin {
         }
     }
 
-    private static StringBuilder generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent) {
+    private static StringBuilder generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent, JavaMessage message) {
+        message.setClassName(messageType.getName());
         sb.append(String.join("", Collections.nCopies(indent, " ")));
         sb.append("|- ");
         sb.append(messageType.getName());
         sb.append("(");
 
-        for (Descriptors.FieldDescriptor field : messageType.getFields()) {
-
-        }
-
+//        List<Descriptors.EnumDescriptor> enumTypes = messageType.getEnumTypes();
+//        enumTypes.forEach(item -> {
+//            String name = item.getName();
+//            String value = String.valueOf(item.getValues());
+//            sb.append(name + ":" + value);
+//        });
+        Map<String, List<Descriptors.EnumValueDescriptor>> enumField = getEnumField(messageType);
+        message.setEnumInfo(enumField);
+        Map<String, String> commonFields = getCommonFields(messageType);
+        message.setMessageTypeInfo(commonFields);
+        getMapField(messageType);
 
         sb.append(
             String.join(
@@ -117,8 +127,52 @@ public class MyProtocPlugin {
         //sb.append(String.join("", Collections.nCopies(indent, " ")));
         sb.append("\n");
         for (Descriptors.Descriptor nestedType : messageType.getNestedTypes()) {
-            generateMessage(sb, nestedType, indent + 3);
+            JavaMessage javaMessage = new JavaMessage();
+            generateMessage(sb, nestedType, indent + 3, javaMessage);
         }
         return sb;
+    }
+
+
+    // =================
+    public static void getMapField(Descriptors.Descriptor descriptor) {
+        List<Descriptors.FieldDescriptor> fields = descriptor.getFields();
+        List<Descriptors.FieldDescriptor> message = fields.stream()
+                .filter(item -> !item.isMapField())
+                .collect(Collectors.toList());
+        for (Descriptors.Descriptor nestedType : descriptor.getNestedTypes()) {
+            String collect = nestedType
+                    .getFields()
+                    .stream()
+                    .map(field -> field.getName() + ": " + renderType(field))
+                    .collect(Collectors.joining(", "));
+            System.out.println(collect);
+        }
+    }
+
+
+    public static Map<String, List<Descriptors.EnumValueDescriptor>> getEnumField(Descriptors.Descriptor descriptor) {
+        List<Descriptors.EnumDescriptor> enumTypes = descriptor.getEnumTypes();
+        Map<String, List<Descriptors.EnumValueDescriptor>> map = new HashMap<>();
+        enumTypes.forEach(item -> {
+            String name = item.getName();
+            List<Descriptors.EnumValueDescriptor> values = item.getValues();
+            map.put(name, values);
+        });
+
+        return map;
+    }
+
+    public static Map<String, String> getCommonFields(Descriptors.Descriptor descriptor) {
+        List<Descriptors.FieldDescriptor> fields = descriptor.getFields();
+        Map<String, String> map = new HashMap<>();
+        for (Descriptors.FieldDescriptor field : fields) {
+            String name = field.getName();
+            String type = ConvertUtil.convertToString(field.getType());
+            if(type.equals("Enum") || type.equals("Message")) continue;
+            map.put(name, type);
+        }
+
+        return map;
     }
 }

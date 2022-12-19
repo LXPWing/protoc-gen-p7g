@@ -1,5 +1,7 @@
 package dto;
 
+import com.google.protobuf.Descriptors;
+
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ public abstract class Message {
 
     private Map<String, String> messageTypeInfo;
 
-    private Map<String, List<Object>> enumInfo;
+    private Map<String, List<Descriptors.EnumValueDescriptor>> enumInfo;
 
     private Map<String, List<String>> mapInfo;
 
@@ -52,11 +54,11 @@ public abstract class Message {
         this.messageTypeInfo = messageTypeInfo;
     }
 
-    public Map<String, List<Object>> getEnumInfo() {
+    public Map<String, List<Descriptors.EnumValueDescriptor>> getEnumInfo() {
         return enumInfo;
     }
 
-    public void setEnumInfo(Map<String, List<Object>> enumInfo) {
+    public void setEnumInfo(Map<String, List<Descriptors.EnumValueDescriptor>> enumInfo) {
         this.enumInfo = enumInfo;
     }
 

@@ -3,6 +3,7 @@ package render;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
+import dto.JavaMessage;
 import dto.Message;
 import utils.ConvertUtil;
 
@@ -64,6 +65,9 @@ public class ParsingProtoc3 implements IProtocl<Descriptors.Descriptor>{
         sb.append(messageType.getName());
         sb.append("(");
 
+        JavaMessage javaMessage = new JavaMessage();
+        javaMessage.setClassName(messageType.getName());
+
         sb.append(
                 String.join(
                         ", ",
@@ -77,6 +81,7 @@ public class ParsingProtoc3 implements IProtocl<Descriptors.Descriptor>{
         sb.append(")");
         sb.append(System.getProperty("line.separator"));
         for (Descriptors.Descriptor nestedType : messageType.getNestedTypes()) {
+            System.out.println(nestedType.getName());
             generateMessage(sb, nestedType, indent + 3);
         }
     }
