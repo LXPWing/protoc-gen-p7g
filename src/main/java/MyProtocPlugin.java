@@ -5,10 +5,7 @@ import dto.JavaMessage;
 import utils.ConvertUtil;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MyProtocPlugin {
@@ -137,16 +134,35 @@ public class MyProtocPlugin {
     // =================
     public static void getMapField(Descriptors.Descriptor descriptor) {
         List<Descriptors.FieldDescriptor> fields = descriptor.getFields();
-        List<Descriptors.FieldDescriptor> message = fields.stream()
-                .filter(item -> !item.isMapField())
-                .collect(Collectors.toList());
+        List<String> names = new ArrayList<>();
+        fields.forEach(item -> {
+            if(item.isMapField()){
+                String name = item.getName();
+                char[] cs=name.toCharArray();
+                cs[0]-=32;
+                StringBuilder sb = new StringBuilder(String.valueOf(cs));
+                sb.append("Entry");
+                names.add(sb.toString());
+            }
+        });
+
+        //System.out.println(names);
+
         for (Descriptors.Descriptor nestedType : descriptor.getNestedTypes()) {
-            String collect = nestedType
-                    .getFields()
-                    .stream()
-                    .map(field -> field.getName() + ": " + renderType(field))
-                    .collect(Collectors.joining(", "));
-            System.out.println(collect);
+//            String collect = nestedType
+//                    .getFields()
+//                    .stream()
+//                    .map(field -> field.getName() + ": " + renderType(field))
+//                    .collect(Collectors.joining(", "));
+//            System.out.println(collect);
+            //System.out.println(descriptor.getNestedTypes().size());
+            if(names.contains(nestedType.getName())){
+                String collect1 = nestedType.getFields()
+                        .stream()
+                        .map(field -> field.getName() + ": " + renderType(field))
+                        .collect(Collectors.joining(", "));
+                System.out.println(nestedType.getName() + ":" + collect1);
+            }
         }
     }
 
