@@ -2,6 +2,8 @@ import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
 import dto.JavaMessage;
+import dto.MapKV;
+import dto.Message;
 import utils.ConvertUtil;
 
 import java.io.IOException;
@@ -9,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class MyProtocPlugin {
-    private Map<String, JavaMessage> map = new HashMap<>();
+    private static Map<String, JavaMessage> map = new HashMap<>();
     private static JavaMessage javaMessage = new JavaMessage();
     public static void main(String[] args) throws IOException, Descriptors.DescriptorValidationException {
         // Plugin receives a serialized CodeGeneratorRequest via stdin
@@ -59,16 +61,15 @@ public class MyProtocPlugin {
         for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
             JavaMessage javaMessage = new JavaMessage();
             generateMessage(s, messageType, 0, javaMessage);
+            map.put(javaMessage.getClassName(), javaMessage);
         }
-        return s.toString();
+        return map.toString();
     }
 
     private static String renderType(Descriptors.FieldDescriptor fd) {
         if (fd.isRepeated() && !fd.isMapField()) {
             return "List<" + renderSingleType(fd) + ">";
         }
-
-        //System.out.println(fd.getType());
 
         if(fd.getType() == Descriptors.FieldDescriptor.Type.ENUM) {
             Descriptors.EnumDescriptor enumType = fd.getEnumType();
@@ -88,52 +89,51 @@ public class MyProtocPlugin {
         }
     }
 
-    private static StringBuilder generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent, JavaMessage message) {
+    private static JavaMessage generateMessage(StringBuilder sb, Descriptors.Descriptor messageType, int indent, JavaMessage message) {
+//        message.setClassName(messageType.getName());
+//        sb.append(String.join("", Collections.nCopies(indent, " ")));
+//        sb.append("|- ");
+//        sb.append(messageType.getName());
+//        sb.append("(");
         message.setClassName(messageType.getName());
-        sb.append(String.join("", Collections.nCopies(indent, " ")));
-        sb.append("|- ");
-        sb.append(messageType.getName());
-        sb.append("(");
-
-//        List<Descriptors.EnumDescriptor> enumTypes = messageType.getEnumTypes();
-//        enumTypes.forEach(item -> {
-//            String name = item.getName();
-//            String value = String.valueOf(item.getValues());
-//            sb.append(name + ":" + value);
-//        });
         Map<String, List<Descriptors.EnumValueDescriptor>> enumField = getEnumField(messageType);
         message.setEnumInfo(enumField);
         Map<String, String> commonFields = getCommonFields(messageType);
         message.setMessageTypeInfo(commonFields);
-        getMapField(messageType);
+        Map<String, MapKV> mapField = getMapField(messageType);
+        message.setMapInfo(mapField);
 
-        sb.append(
-            String.join(
-                ", ", 
-                messageType
-                    .getFields()
-                    .stream()
-                    .map(field -> field.getName() + ": " + renderType(field))
-                    .collect(Collectors.joining(", "))
-            )
-        );
-        sb.append(")");
-        sb.append(System.getProperty("line.separator"));
+//        sb.append(
+//            String.join(
+//                ", ",
+//                messageType
+//                    .getFields()
+//                    .stream()
+//                    .map(field -> field.getName() + ": " + renderType(field))
+//                    .collect(Collectors.joining(", "))
+//            )
+//        );
+//        sb.append(")");
+//        sb.append(System.getProperty("line.separator"));
 
         // recurse for nested messages.
         //sb.append(String.join("", Collections.nCopies(indent, " ")));
-        sb.append("\n");
+        //sb.append("\n");
+        JavaMessage javaMessage = new JavaMessage();
+        Map<String, Message> messageMap = new HashMap<>();
         for (Descriptors.Descriptor nestedType : messageType.getNestedTypes()) {
-            JavaMessage javaMessage = new JavaMessage();
-            generateMessage(sb, nestedType, indent + 3, javaMessage);
+            JavaMessage javaMessage1 = generateMessage(sb, nestedType, indent + 3, javaMessage);
+            messageMap.put(javaMessage1.getClassName(), javaMessage1);
+            //message.setEmbedMessageInfo();
         }
-        return sb;
+        return javaMessage;
     }
 
 
     // =================
-    public static void getMapField(Descriptors.Descriptor descriptor) {
+    public static Map<String, MapKV> getMapField(Descriptors.Descriptor descriptor) {
         List<Descriptors.FieldDescriptor> fields = descriptor.getFields();
+        Map<String, MapKV> map = new HashMap<>();
         List<String> names = new ArrayList<>();
         fields.forEach(item -> {
             if(item.isMapField()){
@@ -146,24 +146,30 @@ public class MyProtocPlugin {
             }
         });
 
-        //System.out.println(names);
-
         for (Descriptors.Descriptor nestedType : descriptor.getNestedTypes()) {
-//            String collect = nestedType
-//                    .getFields()
-//                    .stream()
-//                    .map(field -> field.getName() + ": " + renderType(field))
-//                    .collect(Collectors.joining(", "));
-//            System.out.println(collect);
-            //System.out.println(descriptor.getNestedTypes().size());
             if(names.contains(nestedType.getName())){
                 String collect1 = nestedType.getFields()
                         .stream()
                         .map(field -> field.getName() + ": " + renderType(field))
                         .collect(Collectors.joining(", "));
-                System.out.println(nestedType.getName() + ":" + collect1);
+                // className还原
+                String oldName = nestedType.getName();
+                char[] cs = oldName.toCharArray();
+                cs[0] += 32;
+                int len = cs.length;
+                StringBuilder sb = new StringBuilder(String.valueOf(cs));
+                String newName = sb.substring(0, len - 5);
+                MapKV mapKV = new MapKV();
+                List<Descriptors.FieldDescriptor> fields1 = nestedType.getFields();
+                mapKV.setKey(renderType(fields1.get(0)));
+                mapKV.setValue(renderType(fields1.get(1)));
+                map.put(newName, mapKV);
+
+                //System.out.println(nestedType.getName() + ":" + collect1);
             }
         }
+
+        return map;
     }
 
 

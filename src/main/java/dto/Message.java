@@ -16,7 +16,7 @@ public abstract class Message {
 
     private Map<String, List<Descriptors.EnumValueDescriptor>> enumInfo;
 
-    private Map<String, List<String>> mapInfo;
+    private Map<String, MapKV> mapInfo;
 
     private Map<String, Message> embedMessageInfo;
 
@@ -69,20 +69,19 @@ public abstract class Message {
     public void setEmbedMessageInfo(Map<String, Message> embedMessageInfo) {
         this.embedMessageInfo = embedMessageInfo;
     }
-
-    public Map<String, List<String>> getMapInfo() {
-        return mapInfo;
-    }
-
-    public void setMapInfo(Map<String, List<String>> mapInfo) {
-        this.mapInfo = mapInfo;
-    }
-
     public Map<String, String> getListInfo() {
         return listInfo;
     }
 
     public void setListInfo(Map<String, String> listInfo) {
         this.listInfo = listInfo;
+    }
+
+    public Map<String, MapKV> getMapInfo() {
+        return mapInfo;
+    }
+
+    public void setMapInfo(Map<String, MapKV> mapInfo) {
+        this.mapInfo = mapInfo;
     }
 }
