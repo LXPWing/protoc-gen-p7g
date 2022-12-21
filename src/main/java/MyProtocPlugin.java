@@ -12,7 +12,9 @@ import java.util.stream.Collectors;
 
 public class MyProtocPlugin {
     private static Map<String, JavaMessage> map = new HashMap<>();
-    private static JavaMessage javaMessage = new JavaMessage();
+    private static List ignoreList = new ArrayList();
+    private static List ignoreNameList = new ArrayList();
+
     public static void main(String[] args) throws IOException, Descriptors.DescriptorValidationException {
         // Plugin receives a serialized CodeGeneratorRequest via stdin
         PluginProtos.CodeGeneratorRequest request = PluginProtos.CodeGeneratorRequest.parseFrom(System.in);
@@ -40,12 +42,8 @@ public class MyProtocPlugin {
         PluginProtos.CodeGeneratorResponse.Builder response = PluginProtos.CodeGeneratorResponse.newBuilder();
 
         for (String fileName : request.getFileToGenerateList()) {
+            // 文件递归
             Descriptors.FileDescriptor fd = filesByName.get(fileName);
-
-            javaMessage.setClassName(fileName);
-            javaMessage.setMessageTypeInfo(new HashMap<>());
-            //javaMessage.set
-
             response.addFileBuilder()
                     .setName(fd.getFullName().replaceAll("\\.proto$", ".txt"))
                     .setContent(generateFileContent(fd));
@@ -57,24 +55,26 @@ public class MyProtocPlugin {
 
     private static String generateFileContent(Descriptors.FileDescriptor fd) {
         StringBuilder s = new StringBuilder();
-        // 获取字段
+        // 文件字段递归
         for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
             JavaMessage javaMessage = new JavaMessage();
+            javaMessage.setPackagePath(messageType.getFile().getPackage());
+            //System.out.println(messageType.getFile().getDependencies().toString());
             generateMessage(s, messageType, 0, javaMessage);
             map.put(javaMessage.getClassName(), javaMessage);
         }
+
+        for (Map.Entry<String, JavaMessage> stringJavaMessageEntry : map.entrySet()) {
+            JavaMessage value = stringJavaMessageEntry.getValue();
+            System.out.println(value.toString());
+        }
+
         return map.toString();
     }
 
     private static String renderType(Descriptors.FieldDescriptor fd) {
         if (fd.isRepeated() && !fd.isMapField()) {
             return "List<" + renderSingleType(fd) + ">";
-        }
-
-        if(fd.getType() == Descriptors.FieldDescriptor.Type.ENUM) {
-            Descriptors.EnumDescriptor enumType = fd.getEnumType();
-            System.out.println(enumType.getValues());
-            return enumType.getValues().toString();
         } else {
             return renderSingleType(fd);
         }
@@ -84,7 +84,6 @@ public class MyProtocPlugin {
         if (fd.getType() != Descriptors.FieldDescriptor.Type.MESSAGE) {
             return fd.getType().toString();
         } else {
-            //if(fd.isMapField())return "";
             return fd.getMessageType().getName();
         }
     }
@@ -96,12 +95,13 @@ public class MyProtocPlugin {
 //        sb.append(messageType.getName());
 //        sb.append("(");
         message.setClassName(messageType.getName());
+        Map<String, MapKV> mapField = getMapField(messageType);
+        message.setMapInfo(mapField);
         Map<String, List<Descriptors.EnumValueDescriptor>> enumField = getEnumField(messageType);
         message.setEnumInfo(enumField);
         Map<String, String> commonFields = getCommonFields(messageType);
         message.setMessageTypeInfo(commonFields);
-        Map<String, MapKV> mapField = getMapField(messageType);
-        message.setMapInfo(mapField);
+
 
 //        sb.append(
 //            String.join(
@@ -122,10 +122,11 @@ public class MyProtocPlugin {
         JavaMessage javaMessage = new JavaMessage();
         Map<String, Message> messageMap = new HashMap<>();
         for (Descriptors.Descriptor nestedType : messageType.getNestedTypes()) {
-            JavaMessage javaMessage1 = generateMessage(sb, nestedType, indent + 3, javaMessage);
-            messageMap.put(javaMessage1.getClassName(), javaMessage1);
-            //message.setEmbedMessageInfo();
+            if(ignoreList.contains(nestedType))continue;
+            generateMessage(sb, nestedType, indent + 3, javaMessage);
+            messageMap.put(javaMessage.getClassName(), javaMessage);
         }
+        message.setEmbedMessageInfo(messageMap);
         return javaMessage;
     }
 
@@ -142,12 +143,14 @@ public class MyProtocPlugin {
                 cs[0]-=32;
                 StringBuilder sb = new StringBuilder(String.valueOf(cs));
                 sb.append("Entry");
+                ignoreNameList.add(sb.toString());
                 names.add(sb.toString());
             }
         });
 
         for (Descriptors.Descriptor nestedType : descriptor.getNestedTypes()) {
             if(names.contains(nestedType.getName())){
+                ignoreList.add(nestedType);
                 String collect1 = nestedType.getFields()
                         .stream()
                         .map(field -> field.getName() + ": " + renderType(field))
@@ -164,8 +167,6 @@ public class MyProtocPlugin {
                 mapKV.setKey(renderType(fields1.get(0)));
                 mapKV.setValue(renderType(fields1.get(1)));
                 map.put(newName, mapKV);
-
-                //System.out.println(nestedType.getName() + ":" + collect1);
             }
         }
 
@@ -191,10 +192,16 @@ public class MyProtocPlugin {
         for (Descriptors.FieldDescriptor field : fields) {
             String name = field.getName();
             String type = ConvertUtil.convertToString(field.getType());
-            if(type.equals("Enum") || type.equals("Message")) continue;
-            map.put(name, type);
+            if(type.equals("Enum") || field.isMapField()) continue;
+            map.put(name, renderType(field));
         }
 
         return map;
+    }
+
+    public static Map<String, String> getListFields(Descriptors.Descriptor descriptor) {
+        // TODO 解析list字段
+
+        return null;
     }
 }

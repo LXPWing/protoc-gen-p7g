@@ -14,6 +14,10 @@ message HelloRequest {
     message Hello {
         string name = 1;
         map<string, HelloReply> map = 2;
+        enum Test1 {
+            D = 0;
+            E = 1;
+        }
     }
 
     HelloReply rer = 3;

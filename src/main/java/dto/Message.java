@@ -84,4 +84,18 @@ public abstract class Message {
     public void setMapInfo(Map<String, MapKV> mapInfo) {
         this.mapInfo = mapInfo;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "packagePath='" + packagePath + '\'' +
+                ", className='" + className + '\'' +
+                ", importInfo=" + importInfo +
+                ", messageTypeInfo=" + messageTypeInfo +
+                ", enumInfo=" + enumInfo +
+                ", mapInfo=" + mapInfo +
+                ", embedMessageInfo=" + embedMessageInfo +
+                ", listInfo=" + listInfo +
+                '}';
+    }
 }

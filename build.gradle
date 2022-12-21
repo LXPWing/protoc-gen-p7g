@@ -11,8 +11,8 @@ repositories {
 }
 
 application {
-    //mainClassName = "MyProtocPlugin"
-    mainClassName = "Main"
+    mainClassName = "MyProtocPlugin"
+    //mainClassName = "Main"
 }
 
 dependencies {
