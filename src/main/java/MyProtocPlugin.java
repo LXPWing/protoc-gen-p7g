@@ -1,12 +1,18 @@
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
-import dto.JavaMessage;
-import dto.MapKV;
-import dto.Message;
-import utils.ConvertUtil;
+import freemarker.cache.ByteArrayTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import org.yaml.snakeyaml.error.MarkedYAMLException;
+import p7g.dto.JavaMessage;
+import p7g.dto.MapKV;
+import p7g.dto.Message;
+import p7g.utils.ConvertUtil;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,7 +21,7 @@ public class MyProtocPlugin {
     private static List ignoreList = new ArrayList();
     private static List ignoreNameList = new ArrayList();
 
-    public static void main(String[] args) throws IOException, Descriptors.DescriptorValidationException {
+    public static void main(String[] args) throws IOException, Descriptors.DescriptorValidationException, TemplateException {
         // Plugin receives a serialized CodeGeneratorRequest via stdin
         PluginProtos.CodeGeneratorRequest request = PluginProtos.CodeGeneratorRequest.parseFrom(System.in);
 
@@ -53,7 +59,7 @@ public class MyProtocPlugin {
         //response.build().writeTo(System.out);
     }
 
-    private static String generateFileContent(Descriptors.FileDescriptor fd) {
+    private static String generateFileContent(Descriptors.FileDescriptor fd) throws IOException, TemplateException {
         StringBuilder s = new StringBuilder();
         // 文件字段递归
         for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
@@ -66,10 +72,35 @@ public class MyProtocPlugin {
 
         for (Map.Entry<String, JavaMessage> stringJavaMessageEntry : map.entrySet()) {
             JavaMessage value = stringJavaMessageEntry.getValue();
+            render(value);
             System.out.println(value.toString());
         }
 
         return map.toString();
+    }
+
+
+    public static void render(Message message) throws IOException, TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
+        cfg.setClassForTemplateLoading(MyProtocPlugin.class, "/templates/");
+        cfg.setDefaultEncoding("UTF-8"); // 指定字符编码
+        cfg.setLocale(Locale.CHINESE); // 指定本地语言
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+
+        Template template = cfg.getTemplate("dto.ftl");
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", message);
+
+        Writer consoleWriter = new OutputStreamWriter(System.out);
+        template.process(map, consoleWriter);
+
+        // 将输出结果保存到文件中
+        Writer fileWriter = new FileWriter(new File("output.java"));
+        try {
+            template.process(map, fileWriter);
+        } finally {
+            fileWriter.close();
+        }
     }
 
     private static String renderType(Descriptors.FieldDescriptor fd) {

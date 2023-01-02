@@ -1,0 +1,8 @@
+spring:
+  freemarker:
+    template-loader-path:
+      - classpath:/templates
+    charset: UTF-8
+    suffix: .ftl
+    check-template-location: true
+    enabled: true

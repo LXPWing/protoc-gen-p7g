@@ -18,11 +18,9 @@ application {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
-    // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
     implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.21.7'
-    // https://mvnrepository.com/artifact/org.freemarker/freemarker
-    implementation 'org.freemarker:freemarker:2.3.31'
-
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter', version: '2.6.3'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker', version: '2.6.3'
 }
 
 test {

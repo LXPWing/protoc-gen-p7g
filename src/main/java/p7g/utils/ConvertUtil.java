@@ -1,4 +1,4 @@
-package utils;
+package p7g.utils;
 
 import com.google.protobuf.Descriptors;
 

@@ -1,4 +1,4 @@
-package dto;
+package p7g.dto;
 
 public class MapKV {
     private String key;

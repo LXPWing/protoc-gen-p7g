@@ -1,11 +1,11 @@
-package render;
+package p7g.render;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.compiler.PluginProtos;
-import dto.JavaMessage;
-import dto.Message;
-import utils.ConvertUtil;
+import p7g.dto.JavaMessage;
+import p7g.dto.Message;
+import p7g.utils.ConvertUtil;
 
 import java.util.Collections;
 import java.util.HashMap;

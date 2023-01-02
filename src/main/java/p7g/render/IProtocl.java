@@ -1,4 +1,4 @@
-package render;
+package p7g.render;
 
 import com.google.protobuf.Descriptors;
 

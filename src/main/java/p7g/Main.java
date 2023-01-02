@@ -1,23 +1,26 @@
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.compiler.PluginProtos;
-import render.ParsingProtoc3;
+package p7g;
 
-import java.io.IOException;
+import com.google.protobuf.Descriptors;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+@SpringBootApplication
 public class Main {
-    public static void main(String[] args) throws IOException, Descriptors.DescriptorValidationException {
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class);
         // Plugin receives a serialized CodeGeneratorRequest via stdin
-        PluginProtos.CodeGeneratorRequest request = PluginProtos.CodeGeneratorRequest.parseFrom(System.in);
+        //PluginProtos.CodeGeneratorRequest request = PluginProtos.CodeGeneratorRequest.parseFrom(System.in);
 
-        StringBuilder fields = ParsingProtoc3.getFields(ParsingProtoc3.doAnalysisProtoFile(request));
+        //StringBuilder fields = ParsingProtoc3.getFields(ParsingProtoc3.doAnalysisProtoFile(request));
 
         // Building the response
-        PluginProtos.CodeGeneratorResponse.Builder response = PluginProtos.CodeGeneratorResponse.newBuilder();
-        response.addFileBuilder()
-                .setName("greeter".replaceAll("\\.proto$", ".txt"))
-                .setContent(fields.toString());
+//        PluginProtos.CodeGeneratorResponse.Builder response = PluginProtos.CodeGeneratorResponse.newBuilder();
+//        response.addFileBuilder()
+//                .setName("greeter".replaceAll("\\.proto$", ".txt"))
+//                .setContent(fields.toString());
         // Serialize the response to stdout
         //response.build().writeTo(System.out);
     }
