@@ -50,6 +50,7 @@ public class MyProtocPlugin {
         for (String fileName : request.getFileToGenerateList()) {
             // 文件递归
             Descriptors.FileDescriptor fd = filesByName.get(fileName);
+            List<String> importInfo = fd.getDependencies().stream().map(Descriptors.FileDescriptor::getName).collect(Collectors.toList());
             response.addFileBuilder()
                     .setName(fd.getFullName().replaceAll("\\.proto$", ".txt"))
                     .setContent(generateFileContent(fd));
@@ -65,16 +66,21 @@ public class MyProtocPlugin {
         for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
             JavaMessage javaMessage = new JavaMessage();
             javaMessage.setPackagePath(messageType.getFile().getPackage());
+            List<Descriptors.FileDescriptor> publicDependencies = messageType.getFile().getPublicDependencies();
+            publicDependencies.forEach(item -> {
+                System.out.println(item.getName());
+            });
+
             //System.out.println(messageType.getFile().getDependencies().toString());
-            generateMessage(s, messageType, 0, javaMessage);
+            //generateMessage(s, messageType, 0, javaMessage);
             map.put(javaMessage.getClassName(), javaMessage);
         }
 
-        for (Map.Entry<String, JavaMessage> stringJavaMessageEntry : map.entrySet()) {
-            JavaMessage value = stringJavaMessageEntry.getValue();
-            render(value);
-            System.out.println(value.toString());
-        }
+//        for (Map.Entry<String, JavaMessage> stringJavaMessageEntry : map.entrySet()) {
+//            JavaMessage value = stringJavaMessageEntry.getValue();
+//            render(value);
+//            System.out.println(value.toString());
+//        }
 
         return map.toString();
     }

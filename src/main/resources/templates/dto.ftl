@@ -1,4 +1,4 @@
-pakage ${message.packagePath}
+package ${message.packagePath};
 
 public class ${message.className} {
 

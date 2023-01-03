@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package greeter.test;
+import public "a.proto";
 
 option java_package="proto1/greeter";
 
