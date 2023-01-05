@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class MyProtocPlugin {
-    private static Map<String, JavaMessage> map = new HashMap<>();
+    private static Map<String, Message> map = new HashMap<>();
     private static List ignoreList = new ArrayList();
     private static List ignoreNameList = new ArrayList();
 
@@ -49,38 +49,46 @@ public class MyProtocPlugin {
 
         for (String fileName : request.getFileToGenerateList()) {
             // 文件递归
+            Message m = new JavaMessage();
             Descriptors.FileDescriptor fd = filesByName.get(fileName);
             List<String> importInfo = fd.getDependencies().stream().map(Descriptors.FileDescriptor::getName).collect(Collectors.toList());
-            response.addFileBuilder()
-                    .setName(fd.getFullName().replaceAll("\\.proto$", ".txt"))
-                    .setContent(generateFileContent(fd));
+            //System.out.println(importInfo);
+            m.setImportInfo(importInfo);
+            m.setPackagePath(fd.getPackage());
+            m.setClassName(fd.getName());
+            generateFileContent(fd, m);
+//            response.addFileBuilder()
+//                    .setName(fd.getFullName().replaceAll("\\.proto$", ".txt"))
+//                    .setContent(generateFileContent(fd));
         }
 
         // Serialize the response to stdout
         //response.build().writeTo(System.out);
     }
+    // TODO 主文件解析
 
-    private static String generateFileContent(Descriptors.FileDescriptor fd) throws IOException, TemplateException {
+
+    private static String generateFileContent(Descriptors.FileDescriptor fd, Message message) throws IOException, TemplateException {
         StringBuilder s = new StringBuilder();
         // 文件字段递归
         for (Descriptors.Descriptor messageType : fd.getMessageTypes()) {
             JavaMessage javaMessage = new JavaMessage();
             javaMessage.setPackagePath(messageType.getFile().getPackage());
-            List<Descriptors.FileDescriptor> publicDependencies = messageType.getFile().getPublicDependencies();
-            publicDependencies.forEach(item -> {
-                System.out.println(item.getName());
-            });
-
             //System.out.println(messageType.getFile().getDependencies().toString());
-            //generateMessage(s, messageType, 0, javaMessage);
+            generateMessage(s, messageType, 0, javaMessage);
             map.put(javaMessage.getClassName(), javaMessage);
         }
+        message.setEmbedMessageInfo(map);
 
-//        for (Map.Entry<String, JavaMessage> stringJavaMessageEntry : map.entrySet()) {
-//            JavaMessage value = stringJavaMessageEntry.getValue();
-//            render(value);
-//            System.out.println(value.toString());
+        //System.out.println(message);
+
+//        for (Map.Entry<String, Message> stringJavaMessageEntry : message.getEmbedMessageInfo().entrySet()) {
+//            JavaMessage value = (JavaMessage) stringJavaMessageEntry.getValue();
+//            if(value.getImportInfo() == null) System.out.println("yes");
+//            //render(value);
+//            //System.out.println(value.toString());
 //        }
+        render(message);
 
         return map.toString();
     }
